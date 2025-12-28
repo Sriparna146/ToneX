@@ -21,11 +21,11 @@ async function getsongs(folder) {
   currfolder = folder;
   let a = await fetch(`http://127.0.0.1:3000/${folder}/`);
   let response = await a.text();
-  
+
   let div = document.createElement("div");
   div.innerHTML = response;
   let as = div.getElementsByTagName("a");
-  
+
 
   let songs = [];
   for (let index = 0; index < as.length; index++) {
@@ -38,10 +38,10 @@ async function getsongs(folder) {
   return songs;
 }
 
-const playmusic = (track,pause = false) => {
+const playmusic = (track, pause = false) => {
   //let audio = new Audio("/%5Csongs%5C" + track);
   currentsong.src = `/%5C${currfolder}%5C` + track;
-  if(!pause){
+  if (!pause) {
     currentsong.play();
     play.src = "pause.svg";
   }
@@ -49,13 +49,49 @@ const playmusic = (track,pause = false) => {
   document.querySelector(".songtime").innerHTML = "00:00 / 00:00";
 }
 
+async function displayAlbums() {
+  let a = await fetch(`http://127.0.0.1:3000/songs/`);
+  let response = await a.text();
+
+  let div = document.createElement("div");
+  div.innerHTML = response;
+  //console.log(div);
+  let anchors = div.getElementsByTagName("a")
+  let cardContainer = document.querySelector(".cardContainer")
+  Array.from(anchors).forEach(async (e) => {
+    if (e.href.includes("%5Csongs")) {
+      //console.log(e.href);
+      let folder = e.href.split("%5C").slice(-1)[0];
+      // Get the metadata of the album
+      let a = await fetch(`/songs/${folder}/info.json`)
+      let response = await a.json();
+      console.log(response);
+      cardContainer.innerHTML = cardContainer.innerHTML + ` <div data-folder="${folder}" class="card">
+            <div class="play">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 20V4L19 12L5 20Z" stroke="#141B34" fill="#000" stroke-width="1.5"
+                        stroke-linejoin="round" />
+                </svg>
+            </div>
+
+            <img src="/songs/${folder}/cover.jpg" alt="">
+            <h2>${response.title}</h2>
+            <p>${response.description}</p>
+        </div>`
+    }
+  })
+}
+
 async function main() {
 
 
+  // Get the list of all the songs
+  songs = await getsongs("songs%5Cncs");
+  playmusic(songs[0], true)
 
- // Get the list of all the songs
-    songs = await getsongs("songs%5Cncs");
-    playmusic(songs[0], true)
+  // Display all the albums on the page
+  await displayAlbums()
 
 
   // Show all the songs into playlist
@@ -98,54 +134,54 @@ async function main() {
   });
 
   // Add an event listener to seekbar
-    document.querySelector(".seekbar").addEventListener("click", e => {
-        let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
-        document.querySelector(".circle").style.left = percent + "%";
-        currentsong.currentTime = ((currentsong.duration) * percent) / 100
-    })
+  document.querySelector(".seekbar").addEventListener("click", e => {
+    let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
+    document.querySelector(".circle").style.left = percent + "%";
+    currentsong.currentTime = ((currentsong.duration) * percent) / 100
+  })
 
-     // Add an event listener for hamburger
-    document.querySelector(".hamburger").addEventListener("click", () => {
-        document.querySelector(".left").style.left = "0"
-    })
+  // Add an event listener for hamburger
+  document.querySelector(".hamburger").addEventListener("click", () => {
+    document.querySelector(".left").style.left = "0"
+  })
 
-    // Add an event listener for close button
-    document.querySelector(".close").addEventListener("click", () => {
-        document.querySelector(".left").style.left = "-120%"
-    })
+  // Add an event listener for close button
+  document.querySelector(".close").addEventListener("click", () => {
+    document.querySelector(".left").style.left = "-120%"
+  })
 
-    // Add an event listener for when the previous
-    previous.addEventListener("click", () => {
-      currentsong.pause()
-        console.log("Previous clicked")
-        let index = songs.indexOf(currentsong.src.split(`/%5C${currfolder}%5C`).slice(-1)[0])
-        if ((index - 1) >= 0) {
-            playmusic(songs[index - 1])
-        }
-    })
+  // Add an event listener for when the previous
+  previous.addEventListener("click", () => {
+    currentsong.pause()
+    console.log("Previous clicked")
+    let index = songs.indexOf(currentsong.src.split(`/%5C${currfolder}%5C`).slice(-1)[0])
+    if ((index - 1) >= 0) {
+      playmusic(songs[index - 1])
+    }
+  })
 
-    // Add an event listener to next
-    next.addEventListener("click", () => {
-        currentsong.pause()
-        console.log("Next clicked")
-        //console.log(currentsong.src)
-        //console.log(songs)
-        let index = songs.indexOf(currentsong.src.split(`/%5C${currfolder}%5C`).slice(-1)[0])
-        if ((index + 1) < songs.length) {
-            playmusic(songs[index + 1])
-        }
-    
-        
-    })
+  // Add an event listener to next
+  next.addEventListener("click", () => {
+    currentsong.pause()
+    console.log("Next clicked")
+    //console.log(currentsong.src)
+    //console.log(songs)
+    let index = songs.indexOf(currentsong.src.split(`/%5C${currfolder}%5C`).slice(-1)[0])
+    if ((index + 1) < songs.length) {
+      playmusic(songs[index + 1])
+    }
 
-     // Add an event to volume
-    document.querySelector(".range").getElementsByTagName("input")[0].addEventListener("change", (e) => {
-        console.log("Setting volume to", e.target.value, "/ 100")
-        currentsong.volume = parseInt(e.target.value) / 100
-        if (currentsong.volume >0){
-            document.querySelector(".volume>img").src = document.querySelector(".volume>img").src.replace("mute.svg", "volume.svg")
-        }
-    })
+
+  })
+
+  // Add an event to volume
+  document.querySelector(".range").getElementsByTagName("input")[0].addEventListener("change", (e) => {
+    console.log("Setting volume to", e.target.value, "/ 100")
+    currentsong.volume = parseInt(e.target.value) / 100
+    if (currentsong.volume > 0) {
+      document.querySelector(".volume>img").src = document.querySelector(".volume>img").src.replace("mute.svg", "volume.svg")
+    }
+  })
 }
 
 main();
