@@ -31,7 +31,7 @@ async function getsongs(folder) {
   for (let index = 0; index < as.length; index++) {
     const element = as[index];
     if (element.href.endsWith(".mp3")) {
-      //console.log(element.href);
+      console.log(element.href);
       songs.push(element.href.split(`/%5C${folder}%5C`)[1]);
     }
   }
@@ -58,10 +58,12 @@ async function displayAlbums() {
   //console.log(div);
   let anchors = div.getElementsByTagName("a")
   let cardContainer = document.querySelector(".cardContainer")
-  Array.from(anchors).forEach(async (e) => {
-    if (e.href.includes("%5Csongs")) {
-      //console.log(e.href);
-      let folder = e.href.split("%5C").slice(-1)[0];
+  let array = Array.from(anchors)
+  for (let index = 0; index < array.length; index++) {
+    const element = array[index];
+    if (element.href.includes("%5Csongs")) {
+      console.log(element.href);
+      let folder = element.href.split("%5C").slice(-1)[0];
       // Get the metadata of the album
       let a = await fetch(`/songs/${folder}/info.json`)
       let response = await a.json();
@@ -80,6 +82,18 @@ async function displayAlbums() {
             <p>${response.description}</p>
         </div>`
     }
+  }
+
+  // Load the playlist whenever card is clicked
+  Array.from(document.getElementsByClassName("card")).forEach(e => {
+    e.addEventListener("click", async item => {
+      console.log("Fetching Songs")
+      console.log(item.currentTarget.dataset.folder.split("/")[0])
+      songs = await getsongs(`songs%5C${item.currentTarget.dataset.folder.split("/")[0]}`)
+      console.log(songs)
+      playmusic(songs[0])
+
+    })
   })
 }
 
