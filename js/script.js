@@ -32,6 +32,7 @@ async function getsongs(folder) {
     const element = as[index];
     if (element.href.endsWith(".mp3")) {
       console.log(element.href);
+      console.log(element.href.split(`/%5C${folder}%5C`)[1]);
       songs.push(element.href.split(`/%5C${folder}%5C`)[1]);
     }
   }
@@ -95,17 +96,25 @@ async function displayAlbums() {
 
     })
   })
+  return songs;
 }
 
 async function main() {
 
 
   // Get the list of all the songs
-  songs = await getsongs("songs%5Cncs");
+  songs = await getsongs("songs%5CAngry");
   playmusic(songs[0], true)
 
+  //change playlist button
+  document.querySelector(".change").addEventListener("click", async () => {
+    let name = prompt("Enter the name of the playlist you want to change to");
+    songs = await getsongs(`songs%5C${name}`);
+    playmusic(songs[0])
+  })
+
   // Display all the albums on the page
-  await displayAlbums()
+  songs = await displayAlbums()
 
 
   // Show all the songs into playlist
