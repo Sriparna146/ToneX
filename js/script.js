@@ -31,7 +31,7 @@ async function getsongs(folder) {
   for (let index = 0; index < as.length; index++) {
     const element = as[index];
     if (element.href.endsWith(".mp3")) {
-      console.log(element.href);
+      ;
       console.log(element.href.split(`/%5C${folder}%5C`)[1]);
       songs.push(element.href.split(`/%5C${folder}%5C`)[1]);
     }
@@ -63,7 +63,7 @@ async function displayAlbums() {
   for (let index = 0; index < array.length; index++) {
     const element = array[index];
     if (element.href.includes("%5Csongs")) {
-      console.log(element.href);
+      
       let folder = element.href.split("%5C").slice(-1)[0];
       // Get the metadata of the album
       let a = await fetch(`/songs/${folder}/info.json`)
@@ -88,8 +88,7 @@ async function displayAlbums() {
   // Load the playlist whenever card is clicked
   Array.from(document.getElementsByClassName("card")).forEach(e => {
     e.addEventListener("click", async item => {
-      console.log("Fetching Songs")
-      console.log(item.currentTarget.dataset.folder.split("/")[0])
+
       songs = await getsongs(`songs%5C${item.currentTarget.dataset.folder.split("/")[0]}`)
       console.log(songs)
       playmusic(songs[0])
@@ -103,7 +102,7 @@ async function main() {
 
 
   // Get the list of all the songs
-  songs = await getsongs("songs%5CAngry");
+  songs = await getsongs("songs%5Cncs");
   playmusic(songs[0], true)
 
   //change playlist button
@@ -205,6 +204,8 @@ async function main() {
       document.querySelector(".volume>img").src = document.querySelector(".volume>img").src.replace("mute.svg", "volume.svg")
     }
   })
+
+  
 }
 
 main();
